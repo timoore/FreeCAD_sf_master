@@ -405,15 +405,17 @@ bool TaskDlgPolarPatternParameters::accept()
         TaskPolarPatternParameters* polarpatternParameter = static_cast<TaskPolarPatternParameters*>(parameter);
         std::string axis = polarpatternParameter->getAxis();
         if (!axis.empty()) {
-            App::DocumentObject* sketch = 0;
-            if (axis == "N_Axis")
-                sketch = polarpatternParameter->getSketchObject();
-            else
-                sketch = polarpatternParameter->getSupportObject();
+            App::DocumentObject* axisFeature = 0;
+            if (axis == "N_Axis") {
+                axisFeature = polarpatternParameter->getSketchObject();
+            } else {
+                std::vector<std::string> sub;
+                polarpatternParameter->getAxis(axisFeature, sub);
+            }
 
-            if (sketch) {
+            if (axisFeature) {
                 QString buf = QString::fromLatin1("(App.ActiveDocument.%1,[\"%2\"])");
-                buf = buf.arg(QString::fromLatin1(sketch->getNameInDocument()));
+                buf = buf.arg(QString::fromLatin1(axisFeature->getNameInDocument()));
                 buf = buf.arg(QString::fromLatin1(axis.c_str()));
                 Gui::Command::doCommand(Gui::Command::Doc,"App.ActiveDocument.%s.Axis = %s", name.c_str(), buf.toStdString().c_str());
             }
